@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sweet Shop QA Audit — Ramone Scott</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #1a1a2e; font-size: 13px; line-height: 1.6; }
+  .page { max-width: 900px; margin: 0 auto; background: #fff; }
+
+  /* HEADER */
+  .header { background: #0f172a; color: #fff; padding: 40px 48px 32px; }
+  .header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+  .brand { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #64748b; margin-bottom: 6px; }
+  .auditor-name { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+  .auditor-title { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .badge { background: #1e40af; color: #bfdbfe; font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 6px 14px; border-radius: 4px; }
+  .report-title { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .report-meta { display: flex; gap: 32px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #1e293b; flex-wrap: wrap; }
+  .meta-item label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin-bottom: 3px; }
+  .meta-item span { font-size: 13px; color: #cbd5e1; font-weight: 500; }
+
+  /* SCORE BAR */
+  .score-bar { background: #0f172a; padding: 0 48px 28px; display: flex; gap: 16px; }
+  .score-card { flex: 1; background: #1e293b; border-radius: 8px; padding: 16px 20px; text-align: center; }
+  .score-card .score-num { font-size: 32px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .score-card .score-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
+  .score-critical { color: #f87171; }
+  .score-high { color: #fb923c; }
+  .score-medium { color: #fbbf24; }
+  .score-pass { color: #34d399; }
+
+  /* VERDICT */
+  .verdict-wrap { background: #0f172a; padding: 0 48px 32px; }
+  .verdict { background: #1e293b; border-left: 4px solid #f87171; border-radius: 0 8px 8px 0; padding: 16px 20px; display: flex; align-items: center; gap: 16px; }
+  .verdict-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 2px; }
+  .verdict-text { font-size: 18px; font-weight: 800; color: #f87171; }
+  .verdict-score { margin-left: auto; text-align: right; }
+  .verdict-score .big { font-size: 36px; font-weight: 900; color: #f1f5f9; line-height: 1; }
+  .verdict-score .small { font-size: 11px; color: #475569; }
+
+  /* BODY */
+  .body { padding: 40px 48px; background: #0f172a; }
+  .section { margin-bottom: 32px; background: #1e293b; border-radius: 10px; overflow: hidden; }
+  .section-header { background: #0f172a; padding: 14px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #334155; }
+  .section-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .icon-bug { background: #7f1d1d; color: #fca5a5; }
+  .icon-access { background: #1e3a5f; color: #93c5fd; }
+  .icon-perf { background: #14532d; color: #86efac; }
+  .icon-verdict { background: #3b0764; color: #d8b4fe; }
+  .section-title { font-size: 13px; font-weight: 700; color: #e2e8f0; text-transform: uppercase; letter-spacing: 1px; }
+  .section-body { padding: 24px; }
+
+  /* BUG CARDS */
+  .bug-card { background: #0f172a; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; border-left: 3px solid #334155; }
+  .bug-card:last-child { margin-bottom: 0; }
+  .bug-card.critical { border-left-color: #ef4444; }
+  .bug-card.high { border-left-color: #f97316; }
+  .bug-card.medium { border-left-color: #eab308; }
+  .bug-card.low { border-left-color: #22c55e; }
+  .bug-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; gap: 12px; }
+  .bug-title { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+  .severity-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 3px 8px; border-radius: 3px; white-space: nowrap; }
+  .sev-critical { background: #450a0a; color: #fca5a5; }
+  .sev-high { background: #431407; color: #fed7aa; }
+  .sev-medium { background: #422006; color: #fde68a; }
+  .sev-low { background: #052e16; color: #bbf7d0; }
+  .bug-row { display: grid; grid-template-columns: 90px 1fr; gap: 4px 12px; margin-top: 6px; }
+  .bug-row-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; padding-top: 1px; }
+  .bug-row-value { font-size: 12px; color: #94a3b8; }
+  .bug-row-value.fix { color: #86efac; }
+  code { background: #0f172a; border: 1px solid #334155; padding: 1px 5px; border-radius: 3px; font-size: 11px; color: #7dd3fc; font-family: 'Consolas', monospace; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #0f172a; color: #64748b; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; padding: 10px 14px; text-align: left; border-bottom: 1px solid #334155; }
+  td { padding: 10px 14px; border-bottom: 1px solid #1e293b; color: #94a3b8; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .status-pass { color: #34d399; font-weight: 600; }
+  .status-fail { color: #f87171; font-weight: 600; }
+  .status-warn { color: #fbbf24; font-weight: 600; }
+
+  /* QUICK WINS */
+  .quick-wins { background: #0f172a; border-radius: 8px; padding: 20px 24px; }
+  .quick-wins h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #34d399; margin-bottom: 14px; }
+  .win-item { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+  .win-item:last-child { margin-bottom: 0; }
+  .win-num { width: 22px; height: 22px; border-radius: 50%; background: #14532d; color: #86efac; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .win-text { font-size: 12px; color: #94a3b8; padding-top: 2px; }
+
+  /* FOOTER */
+  .footer { background: #020617; padding: 24px 48px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1e293b; }
+  .footer-left { font-size: 11px; color: #334155; }
+  .footer-right { font-size: 11px; color: #334155; text-align: right; }
+  .footer-name { color: #64748b; font-weight: 600; }
+
+  @media print {
+    body { background: #0f172a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { max-width: 100%; }
+    .section { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="brand">QA Audit Report</div>
+        <div class="auditor-name">Ramone Scott</div>
+        <div class="auditor-title">QA Engineer &nbsp;·&nbsp; UI Testing &nbsp;·&nbsp; Accessibility &nbsp;·&nbsp; API Testing</div>
+      </div>
+      <div class="badge">Portfolio Sample</div>
+    </div>
+    <div class="report-title">Sweet Shop — UI & Accessibility Audit</div>
+    <div class="report-meta">
+      <div class="meta-item"><label>Site</label><span>sweetshop.netlify.app</span></div>
+      <div class="meta-item"><label>Date</label><span>26 April 2026</span></div>
+      <div class="meta-item"><label>Pages Tested</label><span>Home, /sweets, /about, /login, /basket</span></div>
+      <div class="meta-item"><label>Type</label><span>UI · Accessibility · Performance</span></div>
+    </div>
+  </div>
+
+  <!-- SCORE BAR -->
+  <div class="score-bar">
+    <div class="score-card"><div class="score-num score-critical">3</div><div class="score-label">Critical</div></div>
+    <div class="score-card"><div class="score-num score-high">4</div><div class="score-label">High</div></div>
+    <div class="score-card"><div class="score-num score-medium">2</div><div class="score-label">Medium</div></div>
+    <div class="score-card"><div class="score-num score-pass">3</div><div class="score-label">Passed</div></div>
+  </div>
+
+  <!-- VERDICT -->
+  <div class="verdict-wrap">
+    <div class="verdict">
+      <div>
+        <div class="verdict-label">Production Readiness</div>
+        <div class="verdict-text">NEEDS WORK</div>
+      </div>
+      <div class="verdict-score">
+        <div class="big">4<span style="font-size:18px;color:#475569">/10</span></div>
+        <div class="small">Quality Score</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- BUGS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-bug">🐛</div>
+        <div class="section-title">Evidence Collector — Bug Report</div>
+      </div>
+      <div class="section-body">
+
+        <div class="bug-card critical">
+          <div class="bug-header"><div class="bug-title">Bug #1 — Broken Product Image (404)</div><span class="severity-badge sev-critical">Critical</span></div>
+          <div class="bug-row"><span class="bug-row-label">Location</span><span class="bug-row-value"><code>/sweets</code> — Wham Bars product</span></div>
+          <div class="bug-row"><span class="bug-row-label">Detail</span><span class="bug-row-value">Image filename is <code>whan.jpg</code> (typo). Fires a 404 on every page load. Customers see a broken image icon instead of the product.</span></div>
+          <div class="bug-row"><span class="bug-row-label">Fix</span><span class="bug-row-value fix">Rename asset file to <code>wham.jpg</code> and update the src reference.</span></div>
+        </div>
+
+        <div class="bug-card critical">
+          <div class="bug-header"><div class="bug-title">Bug #2 — Legacy Google Analytics (Collecting Zero Data)</div><span class="severity-badge sev-critical">Critical</span></div>
+          <div class="bug-row"><span class="bug-row-label">Location</span><span class="bug-row-value">All pages — <code>&lt;head&gt;</code> tag</span></div>
+          <div class="bug-row"><span class="bug-row-label">Detail</span><span class="bug-row-value">Site uses Universal Analytics tag <code>UA-131763802-1</code>. Google sunset all UA properties in July 2023. No analytics data has been collected since then.</span></div>
+          <div class="bug-row"><span class="bug-row-label">Fix</span><span class="bug-row-value fix">Replace with GA4 measurement ID (<code>G-XXXXXXXX</code>) from Google Analytics dashboard.</span></div>
+        </div>
+
+        <div class="bug-card critical">
+          <div class="bug-header"><div class="bug-title">Bug #3 — No Basket Confirmation After Adding Items</div><span class="severity-badge sev-critical">Critical</span></div>
+          <div class="bug-row"><span class="bug-row-label">Location</span><span class="bug-row-value"><code>/sweets</code> → <code>/basket</code> flow</span></div>
+          <div class="bug-row"><span class="bug-row-label">Detail</span><span class="bug-row-value">After clicking "Add to Basket" there is no visual confirmation — no toast, no counter update, no animation. Users cannot tell if their item was added.</span></div>
+          <div class="bug-row"><span class="bug-row-label">Fix</span><span class="bug-row-value fix">Add a toast notification or animate the basket counter on item add.</span></div>
+        </div>
+
+        <div class="bug-card high">
+          <div class="bug-header"><div class="bug-title">Bug #4 — 16 Product Images Missing Alt Text</div><span class="severity-badge sev-high">High</span></div>
+          <div class="bug-row"><span class="bug-row-label">Location</span><span class="bug-row-value"><code>/sweets</code> — all product images</span></div>
+          <div class="bug-row"><span class="bug-row-label">Detail</span><span class="bug-row-value">All 16 product images lack descriptive alt attributes. Screen reader users receive no product information. Fails WCAG 1.1.1 and UK Equality Act requirements.</span></div>
+          <div class="bug-row"><span class="bug-row-label">Fix</span><span class="bug-row-value fix">Add descriptive alt text to every image. e.g. <code>alt="Wham Bars - retro chewy bar, £0.15"</code></span></div>
+        </div>
+
+        <div class="bug-card high">
+          <div class="bug-header"><div class="bug-title">Bug #5 — City Dropdown Typo in Billing Form</div><span class="severity-badge sev-high">High</span></div>
+          <div class="bug-row"><span class="bug-row-label">Location</span><span class="bug-row-value"><code>/basket</code> — billing address form</span></div>
+          <div class="bug-row"><span class="bug-row-label">Detail</span><span class="bug-row-value">City dropdown contains "Swansow" — should be "Swansea". Customers selecting this city receive incorrect location data on their order.</span></div>
+          <div class="bug-row"><span class="bug-row-label">Fix</span><span class="bug-row-value fix">Correct spelling to "Swansea" in the dropdown option value and label.</span></div>
+        </div>
+
+        <div class="bug-card medium">
+          <div class="bug-header"><div class="bug-title">Bug #6 — Dead Social Media Links</div><span class="severity-badge sev-medium">Medium</span></div>
+          <div class="bug-row"><span class="bug-row-label">Location</span><span class="bug-row-value"><code>/login</code> — footer</span></div>
+          <div class="bug-row"><span class="bug-row-label">Detail</span><span class="bug-row-value">Twitter, Facebook, and LinkedIn icons present in footer but non-functional. No href targets. Clicking does nothing.</span></div>
+          <div class="bug-row"><span class="bug-row-label">Fix</span><span class="bug-row-value fix">Add correct href URLs to each social icon or remove them entirely.</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACCESSIBILITY -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-access">♿</div>
+        <div class="section-title">Accessibility Auditor — WCAG 2.1 AA</div>
+      </div>
+      <div class="section-body">
+        <table>
+          <thead>
+            <tr><th>Issue</th><th>WCAG Criterion</th><th>Severity</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>All 16 product images missing descriptive alt text</td><td>1.1.1 Non-text Content</td><td><span class="severity-badge sev-critical">Critical</span></td></tr>
+            <tr><td>Social media icons have no accessible labels</td><td>1.1.1 Non-text Content</td><td><span class="severity-badge sev-high">High</span></td></tr>
+            <tr><td>Form validation errors not linked to inputs via aria-describedby</td><td>1.3.1 Info & Relationships</td><td><span class="severity-badge sev-high">High</span></td></tr>
+            <tr><td>No skip navigation link for keyboard users</td><td>2.4.1 Bypass Blocks</td><td><span class="severity-badge sev-medium">Medium</span></td></tr>
+            <tr><td>Login form missing autocomplete attributes</td><td>1.3.5 Input Purpose</td><td><span class="severity-badge sev-medium">Medium</span></td></tr>
+            <tr><td>City dropdown "Swansow" mispronounced by screen readers</td><td>3.1.1 Language of Page</td><td><span class="severity-badge sev-low">Low</span></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:16px;padding:12px 16px;background:#0f172a;border-radius:6px;font-size:12px;color:#64748b;">
+          Accessibility Score: <strong style="color:#f87171;">4/10</strong> &nbsp;·&nbsp; Status: <strong style="color:#f87171;">Fails WCAG 2.1 AA minimum standard</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-perf">⚡</div>
+        <div class="section-title">Performance Benchmarker</div>
+      </div>
+      <div class="section-body">
+        <table>
+          <thead>
+            <tr><th>Metric</th><th>Finding</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>CDN delivery</td><td>Netlify CDN — good baseline</td><td><span class="status-pass">PASS</span></td></tr>
+            <tr><td>Caching headers</td><td>Netlify defaults in place</td><td><span class="status-pass">PASS</span></td></tr>
+            <tr><td>HTTPS</td><td>Enforced</td><td><span class="status-pass">PASS</span></td></tr>
+            <tr><td>Broken image (404)</td><td>whan.jpg fires 404 on every /sweets load</td><td><span class="status-fail">FAIL</span></td></tr>
+            <tr><td>Google Analytics</td><td>Legacy UA tag — sunset endpoint, dead request</td><td><span class="status-fail">FAIL</span></td></tr>
+            <tr><td>Image compression</td><td>No evidence of WebP or compressed assets</td><td><span class="status-warn">WARN</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- QUICK WINS -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-icon icon-verdict">✓</div>
+        <div class="section-title">5 Quick Wins — Under 30 Minutes Each</div>
+      </div>
+      <div class="section-body">
+        <div class="quick-wins">
+          <h4>Fix these first</h4>
+          <div class="win-item"><div class="win-num">1</div><div class="win-text">Rename <code>whan.jpg</code> → <code>wham.jpg</code> — fixes broken product image instantly</div></div>
+          <div class="win-item"><div class="win-num">2</div><div class="win-text">Fix "Swansow" → "Swansea" in basket city dropdown</div></div>
+          <div class="win-item"><div class="win-num">3</div><div class="win-text">Replace UA Google Analytics tag with GA4 (<code>G-XXXXXXXX</code>)</div></div>
+          <div class="win-item"><div class="win-num">4</div><div class="win-text">Add descriptive alt text to all 16 product images</div></div>
+          <div class="win-item"><div class="win-num">5</div><div class="win-text">Add <code>aria-label</code> to all social media icon links in the footer</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-left">
+      <div class="footer-name">Ramone Scott — QA Engineer</div>
+      <div>Available for freelance audits · 24–48hr turnaround · Jamaica</div>
+    </div>
+    <div class="footer-right">
+      <div>sweetshop.netlify.app</div>
+      <div>© 2026 Ramone Scott</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
